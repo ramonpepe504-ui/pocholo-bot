@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ramon - Dev | Superior a la leyenda</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif}
+body{background:#000;color:#fff;overflow-x:hidden}
+#canvas{position:fixed;top:0;left:0;z-index:-1}
+.glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);border-radius:20px}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px}
+.hero h1{font-size:60px;background:linear-gradient(90deg,#00f2ff,#7000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero h2{font-size:22px;opacity:0.7;margin-top:10px}
+.stats{display:flex;gap:15px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+.stat{padding:20px 30px;text-align:center}
+.stat b{font-size:28px;display:block;color:#00f2ff}
+.projects{max-width:900px;margin:40px auto;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{padding:25px}
+.card h3{color:#00f2ff;margin-bottom:10px}
+.btn{display:inline-block;margin-top:20px;padding:12px 30px;background:#00f2ff;color:#000;border-radius:30px;text-decoration:none;font-weight:bold}
+@media(max-width:600px){.hero h1{font-size:40px}.projects{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div class="hero">
+<h1>RAMON DEV</h1>
+<h2>Full Stack Developer | Cuba</h2>
+<p style="margin-top:15px;opacity:0.6">Transformando ideas en código real, no plantillas.</p>
+<div class="stats">
+<div class="glass stat"><b>3</b> Proyectos Reales</div>
+<div class="glass stat"><b>100%</b> Código Propio</div>
+<div class="glass stat"><b>24/7</b> Online</div>
+</div>
+<a href="https://github.com/ramonpepe504-ui" class="btn">Ver GitHub</a>
+</div>
+<div class="projects">
+<div class="glass card"><h3>🤖 pocholo-bot</h3><p>Bot de Telegram 24/7 deployado con Docker. Python + API.</p></div>
+<div class="glass card"><h3>🔗 Link Shortener Pro</h3><p>Próximamente: con analytics reales, no fake.</p></div>
+<div class="glass card"><h3>🌐 Portafolio 3D</h3><p>Este sitio. Three.js + WebGL real.</p></div>
+<div class="glass card"><h3>🚀 En construcción</h3><p>Aprendiendo React + Three.js Journey.</p></div>
+</div>
+<script>
+// Three.js fondo 3D real - esto es lo que él NO tiene
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('canvas'),alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+const particles=new THREE.BufferGeometry();
+const count=2000;
+const pos=new Float32Array(count*3);
+for(let i=0;i<count*3;i++)pos[i]=(Math.random()-0.5)*10;
+particles.setAttribute('position',new THREE.BufferAttribute(pos,3));
+const mat=new THREE.PointsMaterial({size:0.02,color:0x00f2ff});
+const pts=new THREE.Points(particles,mat);
+scene.add(pts);
+camera.position.z=3;
+function anim(){requestAnimationFrame(anim);pts.rotation.y+=0.001;pts.rotation.x+=0.0005;renderer.render(scene,camera);}
+anim();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script>
+</body>
+  </html>
