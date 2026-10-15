@@ -2,7 +2,7 @@ import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-TOKEN = os.getenv("BOT_TOKEN") or "PEGA_AQUI_TU_TOKEN"
+TOKEN = os.getenv("BOT_TOKEN") or "8899349942:AAES4zwAfDXI6L8zFbbKZv4cYTt85mWH5qo"
 
 async def start(update, context):
     await update.message.reply_text("✅ Bot 24/7 prendido!\nUsa /fake +54... | comidas online | mensaje")
