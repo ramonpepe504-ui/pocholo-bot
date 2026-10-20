@@ -1,72 +1,62 @@
-from datetime import datetime
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import requests, random
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 from PIL import Image, ImageDraw
 import io
 
-# ========= PON TU TOKEN AQUÍ ABAJO =========
+# ========= PEGA TUS 2 CLAVES AQUÍ =========
 TOKEN = "8899349942:AAES4zwAfDXI6L8zFbbKZv4cYTt85mWH5qo"
-# Ejemplo: TOKEN = "7991234567:AAHqwertyuiop1234567890abcdef"
-# ============================================
+POLLI_KEY = "sk_rCGcoyhBE3vWlDQ2uExT6nEBDHFEPAqn"
+# =========================================
 
 MENU_TEXTO = """
-👑 POCHOLO DARK KING KONG - DESTRUCTOR DE SISTEMAS 👑
-✅ Bot 24/7 Online - Versión 3D
+👑 POCHOLO DARK KING KONG - CEREBRO IA ACTIVADO 🧠🇨🇺
 
 📋 MENÚ:
-▶️ /start - Ver menú 3D destructor
-📜 /menu - Ver menú de nuevo
-🎭 /fake + texto - Crear broma legal
-❓ /help - Ayuda
-🍔 /comida - Próximamente comidas online
-
-Todo lo anterior sigue funcionando igual!
+🧠 /ia + pregunta - Cerebro como Meta AI
+💻 /code + lo que quieras - Te programa
+▶️ /start - Menú
 """
 
+def get_botones():
+    return InlineKeyboardMarkup([[InlineKeyboardButton("🧠 CEREBRO IA", callback_data='ia')]])
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        with open('menu3d.png', 'rb') as photo:
-            await update.message.reply_photo(photo=photo, caption=MENU_TEXTO)
-    except:
-        await update.message.reply_text(MENU_TEXTO)
+    await update.message.reply_text(MENU_TEXTO, reply_markup=get_botones())
 
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await start(update, context)
-
-async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(MENU_TEXTO)
-
-async def fake(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    texto = " ".join(context.args)
-    if not texto:
-        await update.message.reply_text("Usa: /fake hola bro\n\n" + MENU_TEXTO)
+async def ia_cerebro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pregunta = " ".join(context.args)
+    if not pregunta:
+        await update.message.reply_text("🧠 Usa: /ia hazme un bot que mande fotos\n💻 /code crea una calculadora en python")
         return
+    await update.message.reply_text("🧠 Pensando como programador senior... ⏳")
+    try:
+        headers = {"Authorization": f"Bearer {POLLI_KEY}", "Content-Type": "application/json"}
+        data = {
+            "model": "openai",
+            "messages": [
+                {"role": "system", "content": "Eres POCHOLO DARK, programador senior nivel Dios, como Meta AI. Experto en Python y Telegram bots. Respondes en español cubano, calle, explicas paso a paso y das código completo listo para copiar/pegar."},
+                {"role": "user", "content": pregunta}
+            ]
+        }
+        r = requests.post("https://gen.pollinations.ai/v1/chat/completions", headers=headers, json=data, timeout=60)
+        print(r.text)
+        respuesta = r.json()['choices'][0]['message']['content']
+        for i in range(0, len(respuesta), 4000):
+            await update.message.reply_text(respuesta[i:i+4000])
+    except Exception as e:
+        await update.message.reply_text(f"Error: {e}\nRevisa que copiaste bien la POLLI_KEY")
 
-    img = Image.new('RGB', (600, 350), color=(20, 20, 30))
-    draw = ImageDraw.Draw(img)
-    fecha = datetime.now().strftime("%d/%m/%Y")
-    draw.rectangle([(0,0), (600, 60)], fill=(0, 200, 255))
-    draw.text((10, 15), f"🎭 BROMA - NO ES REAL - {fecha}", fill=(0,0,0))
-    draw.rectangle([(20, 80), (580, 280)], fill=(255,255,255), outline=(0,200,255), width=2)
-    draw.text((30, 90), "Contacto Broma:", fill=(100,100,100))
-    draw.text((30, 120), texto, fill=(0,0,0))
-    draw.text((20, 310), "Hecho con pocholo-bot", fill=(120,120,120))
-
-    bio = io.BytesIO()
-    bio.name = 'broma.png'
-    img.save(bio, 'PNG')
-    bio.seek(0)
-    await update.message.reply_photo(photo=bio, caption="✅ Broma generada!")
-
-async def comida(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🍔 Próximamente: comidas online\nPor ahora usa /fake y /menu")
+async def code_cerebro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pregunta = " ".join(context.args) or "hola"
+    context.args = [f"PROGRAMAME CODIGO COMPLETO Y EXPLICAME PASO A PASO: {pregunta}"]
+    await ia_cerebro(update, context)
 
 app = ApplicationBuilder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("menu", menu))
-app.add_handler(CommandHandler("help", help_cmd))
-app.add_handler(CommandHandler("fake", fake))
-app.add_handler(CommandHandler("comida", comida))
+app.add_handler(CommandHandler("ia", ia_cerebro))
+app.add_handler(CommandHandler("code", code_cerebro))
+app.add_handler(CallbackQueryHandler(lambda u,c: u.callback_query.answer()))
 
-print("POCHOLO BOT 24/7 3D - TODO MANTENIDO + NUEVO!")
+print("POCHOLO V6 - CEREBRO POLLINATIONS ACTIVADO")
 app.run_polling()
