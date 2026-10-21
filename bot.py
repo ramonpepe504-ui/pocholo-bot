@@ -1,96 +1,63 @@
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
-from PIL import Image, ImageDraw, ImageFont
-import io, os
+import os
+from PIL import Image, ImageDraw
 
-TOKEN = "8899349942:AAES4zwAfDXI6L8zFbbKZv4cYTt85mWH5qo"
-POLLI_KEY = "sk_9TIMuCKYa3NXGnvfQFKAB4wIBkirF8Oo"
+TOKEN = "8899349942:AAES4zwAfDXI6L8zFbbKZv4cYTt85mWH5qo"  # <--- SOLO ESTO TIENES QUE PONER
 
-# --- Crea el logo 3D si no existe ---
-def crear_menu3d():
-    if os.path.exists('menu3d.png'):
-        return
+# Crea logo si no existe
+if not os.path.exists('menu3d.png'):
     try:
-        img = Image.new('RGB', (800, 400), color=(10, 10, 25))
-        draw = ImageDraw.Draw(img)
-        # Fondo neón
-        draw.rectangle([(0,0),(800,400)], fill=(20,0,40))
-        draw.rectangle([(20,20),(780,380)], outline=(0,255,255), width=4)
-        draw.text((50, 50), "POCHOLO DARK", fill=(0,255,255))
-        draw.text((50, 120), "KING KONG", fill=(255,0,255))
-        draw.text((50, 200), "CEREBRO IA CUBA - ONLINE", fill=(255,255,255))
-        draw.text((50, 280), "Hecho por ti, pa' Cuba", fill=(200,200,200))
+        img = Image.new('RGB', (900, 450), (15,0,35))
+        d = ImageDraw.Draw(img)
+        d.rectangle([(10,10),(890,440)], outline=(0,255,255), width=5)
+        d.text((40,40), "POCHOLO DARK KING KONG", fill=(0,255,255))
+        d.text((40,150), "CEREBRO IA V8 - ILIMITADO", fill=(255,255,255))
+        d.text((40,250), "No gasta polen - Cuba Ready", fill=(255,0,255))
         img.save('menu3d.png')
-        print("menu3d.png creado")
-    except Exception as e:
-        print(f"No se pudo crear imagen: {e}")
+    except: pass
 
-crear_menu3d()
+MENU = "👑 POCHOLO DARK V8 - CEREBRO ILIMITADO 🧠\n\n🧠 /ia pregunta\n💻 /code hazme algo\n▶️ /start menu\n\nEste cerebro NO SE ACABA nunca."
 
-MENU_TEXTO = """
-👑 POCHOLO DARK KING KONG - CEREBRO IA 🧠🇨🇺
+def botones(): return InlineKeyboardMarkup([[InlineKeyboardButton("🧠 IA", callback_data='a'), InlineKeyboardButton("💻 CODE", callback_data='b')]])
 
-🧠 /ia + pregunta - Cerebro programador
-💻 /code + lo que quieras - Te codea completo
-▶️ /start - Menú con logo 3D
-"""
-
-def get_botones():
-    return InlineKeyboardMarkup([[InlineKeyboardButton("🧠 CEREBRO IA", callback_data='ia'), InlineKeyboardButton("💻 CODE", callback_data='code')]])
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(u,c):
     try:
-        with open('menu3d.png', 'rb') as photo:
-            await update.message.reply_photo(photo=photo, caption=MENU_TEXTO, reply_markup=get_botones())
-    except Exception as e:
-        print(e)
-        await update.message.reply_text(MENU_TEXTO, reply_markup=get_botones())
+        with open('menu3d.png','rb') as f: await u.message.reply_photo(f, caption=MENU, reply_markup=botones())
+    except: await u.message.reply_text(MENU, reply_markup=botones())
 
-async def ia_cerebro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pregunta = " ".join(context.args)
-    if not pregunta:
-        await update.message.reply_text("🧠 Usa: /ia hazme un bot que descargue videos de youtube en python")
-        return
-    await update.message.reply_text("🧠 Pensando en modo programador destructor cubano... ⏳")
-    try:
-        headers = {"Authorization": f"Bearer {POLLI_KEY}", "Content-Type": "application/json"}
-        # MODELO BUENO PARA CODIGO
-        data = {
-            "model": "openai-large",
-            "messages": [
-                {"role": "system", "content": "Eres POCHOLO DARK, programador senior nivel Dios como Meta AI. Experto en Python, Telegram bots, APIs. Si el usuario pide codigo, SIEMPRE das el codigo completo, listo para copiar/pegar, funcional, sin dejar partes con '...'. Explicas paso a paso en español cubano."},
-                {"role": "user", "content": pregunta}
-            ],
-            "stream": False
-        }
-        r = requests.post("https://gen.pollinations.ai/v1/chat/completions", headers=headers, json=data, timeout=90)
-        print("RESPUESTA POLLI:", r.text[:500])
-        j = r.json()
-        respuesta = j['choices'][0]['message']['content']
+async def ia(u,c):
+    pregunta = " ".join(c.args)
+    if not pregunta: await u.message.reply_text("Usa: /ia hazme una pagina web"); return
+    await u.message.reply_text("🧠 Programando... ⏳")
+    # 3 CEREBROS DE RESPALDO - si falla uno, entra el otro
+    cerebros = [
+        f"https://text.pollinations.ai/{requests.utils.quote(f'Eres POCHOLO DARK, programador senior cubano, nivel Meta AI. Das codigo completo funcional sin dejar ... Explicas paso a paso. Pregunta: {pregunta}')}",
+        f"https://text.pollinations.ai/{requests.utils.quote(pregunta)}?model=openai-large&system=Eres%20POCHOLO%20DARK%20programador%20senior%20cubano%20nivel%20Dios,%20das%20codigo%20completo%20funcional",
+        f"https://text.pollinations.ai/{requests.utils.quote(pregunta)}?model=mistral"
+    ]
+    for url in cerebros:
+        try:
+            r = requests.get(url, timeout=60)
+            if r.status_code==200 and len(r.text)>20:
+                txt=r.text
+                for i in range(0,len(txt),3900): await u.message.reply_text(txt[i:i+3900])
+                return
+        except Exception as e: print(e); continue
+    await u.message.reply_text("Todos los cerebros fallaron, intenta de nuevo en 10 seg")
 
-        # Enviar en trozos
-        for i in range(0, len(respuesta), 3900):
-            await update.message.reply_text(respuesta[i:i+3900])
-    except Exception as e:
-        await update.message.reply_text(f"Error cerebro: {e}\nRevisa logs")
-
-async def code_cerebro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pregunta = " ".join(context.args)
-    if not pregunta:
-        await update.message.reply_text("💻 Usa: /code crea una calculadora con tkinter")
-        return
-    context.args = [f"CREAME ESTO CON CODIGO COMPLETO FUNCIONAL EN PYTHON, EXPLICAME PASO A PASO COMO LO HICISTE, NO DEJES PARTES VACIAS: {pregunta}"]
-    await ia_cerebro(update, context)
-
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE): await start(update, context)
+async def code(u,c):
+    p=" ".join(c.args)
+    c.args=[f"DAME CODIGO COMPLETO EN PYTHON 100% FUNCIONAL, LISTO PARA COPIAR PEGAR, SIN PONER '...', EXPLICA PASO A PASO EN CUBANO: {p}"]
+    await ia(u,c)
 
 app = ApplicationBuilder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("menu", menu))
-app.add_handler(CommandHandler("ia", ia_cerebro))
-app.add_handler(CommandHandler("code", code_cerebro))
+app.add_handler(CommandHandler("menu", start))
+app.add_handler(CommandHandler("ia", ia))
+app.add_handler(CommandHandler("code", code))
 app.add_handler(CallbackQueryHandler(lambda u,c: u.callback_query.answer()))
 
-print("POCHOLO V7 - LOGO + CODE FIX OK")
+print("V8 ILIMITADO ONLINE")
 app.run_polling()
