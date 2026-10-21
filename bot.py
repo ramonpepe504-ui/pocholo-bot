@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from PIL import Image
 
-TOKEN = os.getenv("8899349942:AAHkk7rW7WTfXn2LMeyAemYae94RqrA-CMI") or os.getenv("8899349942:AAHkk7rW7WTfXn2LMeyAemYae94RqrA-CMI")
+TOKEN = os.getenv("8899349942:AAHzVOEII3FQ5csVeMmxCJz2niUXfASrcO4-CMI") or os.getenv("8899349942:AAHzVOEII3FQ5csVeMmxCJz2niUXfASrcO4-CMI")
 
 # ========= MEMORIA REAL V13 - GUARDA CONTINUIDAD =========
 # Guarda por cada usuario lo que han hablado
