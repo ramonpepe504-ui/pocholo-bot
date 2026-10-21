@@ -4,7 +4,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
 from PIL import Image, ImageDraw
 
-TOKEN = "8899349942:AAES4zwAfDXI6L8zFbbKZv4cYTt85mWH5qo"
+TOKEN = "8899349942:AAEY6Gk5G5y_6gy2gcLCUIEQ7hOW5ZRILcU"
 
 # Logo auto-creado
 if not os.path.exists('menu3d.png'):
